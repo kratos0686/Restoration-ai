@@ -154,6 +154,7 @@ The `IntelligenceRouter` service selects the appropriate model based on task com
 
 | TaskComplexity | Model | Use Case |
 |----------------|-------|---------|
+| `LITE_ANALYSIS` | `gemini-2.5-flash-lite` | Cheapest/fastest — form validation, simple lookups, trivial classification |
 | `FAST_ANALYSIS` | `gemini-3-flash-preview` | Quick categorization, summaries |
 | `DEEP_REASONING` | `gemini-3-pro-preview` | Complex generation, narratives, scope |
 | `VISION_ANALYSIS` | `gemini-3-pro-image-preview` | Photo/damage analysis |

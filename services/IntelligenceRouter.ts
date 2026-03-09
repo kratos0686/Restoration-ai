@@ -2,6 +2,7 @@
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 
 export type TaskComplexity =
+  | 'LITE_ANALYSIS'
   | 'FAST_ANALYSIS'
   | 'DEEP_REASONING'
   | 'VISION_ANALYSIS'
@@ -40,6 +41,7 @@ export class IntelligenceRouter {
 
   private pickBestModel(complexity: TaskComplexity): string {
     switch (complexity) {
+      case 'LITE_ANALYSIS': return 'gemini-2.5-flash-lite';
       case 'FAST_ANALYSIS': return 'gemini-3-flash-preview';
       case 'DEEP_REASONING': return 'gemini-3-pro-preview';
       case 'VISION_ANALYSIS': return 'gemini-3-pro-image-preview';
