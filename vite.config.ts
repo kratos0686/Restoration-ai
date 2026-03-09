@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
       plugins: [react()],
       define: {
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+        'process.env.VERTEX_PROJECT': JSON.stringify(env.VERTEX_PROJECT),
+        'process.env.VERTEX_LOCATION': JSON.stringify(env.VERTEX_LOCATION),
       },
       resolve: {
         alias: {

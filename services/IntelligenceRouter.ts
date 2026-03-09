@@ -1,13 +1,15 @@
 
 import { GoogleGenAI, GenerateContentResponse, Type } from "@google/genai";
 
-export type TaskComplexity = 
-  | 'FAST_ANALYSIS'      
-  | 'DEEP_REASONING'     
-  | 'VISION_ANALYSIS'    
-  | 'CREATIVE_EDIT'      
-  | 'VIDEO_GENERATION'   
-  | 'LOCATION_SERVICES'; 
+export type TaskComplexity =
+  | 'FAST_ANALYSIS'
+  | 'DEEP_REASONING'
+  | 'VISION_ANALYSIS'
+  | 'CREATIVE_EDIT'
+  | 'VIDEO_GENERATION'
+  | 'LOCATION_SERVICES';
+
+export type AIBackend = 'gemini' | 'vertex';
 
 interface RouterConfig {
   systemInstruction?: string;
@@ -21,9 +23,19 @@ interface RouterConfig {
 
 export class IntelligenceRouter {
   private ai: GoogleGenAI;
+  readonly backend: AIBackend;
 
-  constructor() {
-    this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  constructor(backend: AIBackend = 'gemini') {
+    this.backend = backend;
+    if (backend === 'vertex') {
+      this.ai = new GoogleGenAI({
+        vertexai: true,
+        project: process.env.VERTEX_PROJECT,
+        location: process.env.VERTEX_LOCATION || 'us-central1',
+      });
+    } else {
+      this.ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
   }
 
   private pickBestModel(complexity: TaskComplexity): string {

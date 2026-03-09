@@ -170,6 +170,27 @@ The `IntelligenceRouter` service selects the appropriate model based on task com
 - **Routing**: Always instantiate `IntelligenceRouter` and call `execute()` — never hardcode a model name.
 - **Video generation**: `VIDEO_GENERATION` complexity cannot use `execute()` — call `router.generateVideo(prompt, imageBase64?)` instead.
 
+### Vertex AI Backend
+
+`IntelligenceRouter` supports two backends via its constructor:
+
+```typescript
+// Default — Gemini API (API key auth)
+const router = new IntelligenceRouter();
+const router = new IntelligenceRouter('gemini');
+
+// Vertex AI (GCP project + ADC/service account auth)
+const router = new IntelligenceRouter('vertex');
+```
+
+Both backends expose the same method surface — `execute()`, `generateVideo()`, etc. — so switching backends requires no changes to call sites. The active backend is readable via `router.backend`.
+
+Use Vertex AI when you need:
+- Enterprise VPC-SC / private networking
+- GCP IAM-based access control instead of API keys
+- Data residency in a specific GCP region
+- Higher rate limits via GCP quotas
+
 ### IntelligenceRouter Higher-Level Methods
 
 ```typescript
@@ -191,13 +212,18 @@ await router.generateVideo(prompt, optionalBase64Image);
 router.getOperationsClient();
 ```
 
-### Environment Variable
+### Environment Variables
 
 ```bash
-GEMINI_API_KEY=your_key_here   # Required. Set in .env.local
+# Gemini API backend (default)
+GEMINI_API_KEY=your_key_here   # Required for 'gemini' backend. Set in .env.local
+
+# Vertex AI backend (optional)
+VERTEX_PROJECT=your-gcp-project-id   # Required for 'vertex' backend
+VERTEX_LOCATION=us-central1          # Defaults to us-central1 if not set
 ```
 
-Vite exposes this as both `process.env.GEMINI_API_KEY` and `process.env.API_KEY`.
+Vite exposes all four as `process.env.*` — `GEMINI_API_KEY`, `API_KEY` (alias), `VERTEX_PROJECT`, and `VERTEX_LOCATION`.
 
 ---
 
@@ -335,7 +361,7 @@ Use `@/components/Foo` instead of relative paths like `../../components/Foo`.
 
 1. **No CI/CD**: No GitHub Actions or deployment pipeline configured. Build manually with `npm run build`.
 2. **No test runner**: Tests are stubs only. Vitest setup needed before writing real tests.
-3. **API key exposure**: `GEMINI_API_KEY` is bundled into the client build via Vite `define`. For production, proxy Gemini calls through a backend service.
+3. **API key exposure**: `GEMINI_API_KEY` is bundled into the client build via Vite `define`. For production, use the Vertex AI backend with server-side ADC instead, or proxy Gemini calls through a backend service.
 4. **preinstall.js**: This file runs automatically during `npm install` and contains obfuscated code. It should be audited or removed before production deployment.
 5. **Mock data only**: `data/mockApi.ts` is the entire data layer. There is no real backend — all persistence is in-memory during the session and resets on page reload.
 6. **Duplicate files at root**: `App-1.tsx`, `index-1.html`, `index-1.tsx`, `types-1.ts`, `metadata-1.json` are likely experimental alternates and should not be imported.
