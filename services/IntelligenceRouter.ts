@@ -52,9 +52,42 @@ export class IntelligenceRouter {
     }
   }
 
+  async stream(complexity: TaskComplexity, contents: any, config: RouterConfig = {}): Promise<AsyncIterable<string>> {
+    const model = this.pickBestModel(complexity);
+
+    if (complexity === 'VIDEO_GENERATION') {
+      throw new Error("Video generation does not support streaming. Use generateVideo() instead.");
+    }
+
+    const generationConfig: any = {
+      systemInstruction: config.systemInstruction,
+      responseMimeType: config.responseMimeType,
+      responseSchema: config.responseSchema,
+      tools: config.tools,
+      toolConfig: config.toolConfig,
+    };
+
+    if (config.thinkingBudget && (model === 'gemini-3-pro-preview' || model === 'gemini-3-pro-image-preview')) {
+      generationConfig.thinkingConfig = { thinkingBudget: config.thinkingBudget };
+    }
+
+    const result = await this.ai.models.generateContentStream({
+      model,
+      contents: typeof contents === 'string' ? { parts: [{ text: contents }] } : contents,
+      config: generationConfig,
+    });
+
+    return (async function* () {
+      for await (const chunk of result) {
+        const text = chunk.text();
+        if (text) yield text;
+      }
+    })();
+  }
+
   async execute(complexity: TaskComplexity, contents: any, config: RouterConfig = {}): Promise<GenerateContentResponse> {
     const model = this.pickBestModel(complexity);
-    
+
     if (complexity === 'VIDEO_GENERATION') {
         throw new Error("Video generation requires specific operation handling via generateVideo method.");
     }

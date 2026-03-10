@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bot, X, Mic, Send, VolumeX, Loader2 } from 'lucide-react';
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { useAppContext } from '../context/AppContext';
-import { encode, decode, decodeAudioData } from '../utils/audio';
+import { encode, decode, decodeAudioData } from '../services/audio';
+import { IntelligenceRouter } from '../services/IntelligenceRouter';
 
 interface GeminiAssistantProps {
   context: string;
@@ -160,16 +161,28 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ context, isOpen, onCl
     setIsTyping(true);
 
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-        const response = await ai.models.generateContent({
-            model: 'gemini-3-flash-preview',
-            contents: `Context: ${context}. User: ${msg}`,
-        });
-        setMessages(prev => [...prev, { role: 'ai', text: response.text || "I processed that, but have no response." }]);
-    } catch (err) {
-        setMessages(prev => [...prev, { role: 'ai', text: "Error connecting to AI service." }]);
-    } finally {
+        const router = new IntelligenceRouter();
+        const chunks = await router.stream(
+            'FAST_ANALYSIS',
+            `You are an expert water mitigation consultant. Context: ${context}. User: ${msg}`,
+        );
+
         setIsTyping(false);
+        setMessages(prev => [...prev, { role: 'ai', text: '' }]);
+
+        for await (const chunk of chunks) {
+            setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    text: updated[updated.length - 1].text + chunk,
+                };
+                return updated;
+            });
+        }
+    } catch (err) {
+        setIsTyping(false);
+        setMessages(prev => [...prev, { role: 'ai', text: "Error connecting to AI service." }]);
     }
   };
 

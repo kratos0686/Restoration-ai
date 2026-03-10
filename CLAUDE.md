@@ -168,7 +168,8 @@ The `IntelligenceRouter` service selects the appropriate model based on task com
 - **Extended thinking**: Pass `thinkingBudget` in the config — only applied for `DEEP_REASONING` and `VISION_ANALYSIS` models.
 - **Vision**: Convert images to base64 via `photoutils.ts` before sending to Gemini.
 - **Live mode**: Use `audio.ts` utilities (`encode`, `decode`, `decodeAudioData`) for streaming audio.
-- **Routing**: Always instantiate `IntelligenceRouter` and call `execute()` — never hardcode a model name.
+- **Routing**: Always instantiate `IntelligenceRouter` and call `execute()` or `stream()` — never hardcode a model name.
+- **Streaming**: Use `router.stream()` for user-facing chat and long-form generation — yields tokens progressively via `AsyncIterable<string>`. Use `router.execute()` when you need the full `GenerateContentResponse` object (e.g. for structured JSON parsing).
 - **Video generation**: `VIDEO_GENERATION` complexity cannot use `execute()` — call `router.generateVideo(prompt, imageBase64?)` instead.
 
 ### Vertex AI Backend
@@ -196,6 +197,13 @@ Use Vertex AI when you need:
 
 ```typescript
 const router = new IntelligenceRouter();
+
+// Stream tokens progressively (for chat / long-form generation)
+const chunks = await router.stream('FAST_ANALYSIS', prompt);
+for await (const chunk of chunks) { /* append chunk to UI */ }
+
+// Full response (for structured JSON output)
+const response = await router.execute('FAST_ANALYSIS', prompt, { responseMimeType: 'application/json', ... });
 
 // Categorize and extract structured data from field input
 await router.parseFieldIntent(userInput, projectContext);
