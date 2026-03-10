@@ -42,10 +42,10 @@ This file documents the codebase structure, development conventions, and workflo
 │   └── AppContext.tsx   # Global state: auth, permissions, selected project, online status
 ├── services/
 │   ├── EventBus.ts      # CloudEvent pub/sub messaging (Eventarc-compliant)
-│   ├── IntelligenceRouter.ts  # Routes tasks to optimal Gemini model by complexity
-│   ├── audio.ts         # Audio encode/decode for Gemini live mode
-│   └── photoutils.ts    # Blob → base64 for image API calls
+│   └── IntelligenceRouter.ts  # Routes tasks to optimal Gemini model by complexity
 ├── utils/
+│   ├── audio.ts           # Audio encode/decode for Gemini live mode
+│   ├── photoutils.ts      # Blob → base64 for image API calls
 │   ├── psychrometrics.ts  # Psychrometric calculations (dew point, GPP, vapor pressure)
 │   └── uploadUtils.ts     # Resumable GCP uploads (5 MB chunks)
 ├── hooks/
@@ -54,7 +54,9 @@ This file documents the codebase structure, development conventions, and workflo
 │   └── mockApi.ts         # Mock API with seed data (companies, users, projects, equipment)
 ├── scripts/
 │   └── run-odm.sh         # Docker command for OpenDroneMap 3D mesh generation
-├── tests/                 # Test file stubs (no test runner configured yet)
+├── .github/
+│   └── workflows/ci.yml   # GitHub Actions — type check, test, build
+├── tests/                 # Vitest test suite (psychrometrics, audio, IntelligenceRouter, AppContext)
 ├── types.ts               # All TypeScript domain types and enums
 ├── App.tsx                # Root component — routing between mobile/desktop layouts
 ├── index.tsx              # React entry point
@@ -402,7 +404,7 @@ const parsed = JSON.parse(response.text());
 ### Vision (image analysis)
 
 ```typescript
-import { blobToBase64 } from '@/services/photoutils';
+import { blobToBase64 } from '@/utils/photoutils';
 const base64 = await blobToBase64(imageBlob);
 // Pass as inlineData part in the contents array to router.execute()
 ```
@@ -410,7 +412,7 @@ const base64 = await blobToBase64(imageBlob);
 ### Audio (live streaming)
 
 ```typescript
-import { encode, decode, decodeAudioData } from '@/services/audio';
+import { encode, decode, decodeAudioData } from '@/utils/audio';
 // encode: Uint8Array → base64 string
 // decode: base64 string → Uint8Array
 // decodeAudioData: Uint8Array → Web Audio API AudioBuffer

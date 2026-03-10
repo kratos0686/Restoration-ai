@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bot, X, Mic, Send, VolumeX, Loader2 } from 'lucide-react';
 import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
 import { useAppContext } from '../context/AppContext';
-import { encode, decode, decodeAudioData } from '../services/audio';
+import { encode, decode, decodeAudioData } from '../utils/audio';
 import { IntelligenceRouter } from '../services/IntelligenceRouter';
 
 interface GeminiAssistantProps {

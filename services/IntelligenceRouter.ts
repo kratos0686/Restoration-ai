@@ -79,7 +79,7 @@ export class IntelligenceRouter {
 
     return (async function* () {
       for await (const chunk of result) {
-        const text = chunk.text();
+        const text = chunk.text;
         if (text) yield text;
       }
     })();

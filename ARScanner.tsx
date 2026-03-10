@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { X, Camera, Ruler, Square, Check, RefreshCw, Zap, Plus, Cuboid, Layers, Share2, ArrowLeft, Maximize2, ScanLine, BrainCircuit, Orbit } from 'lucide-react';
 import { GoogleGenAI, Type } from "@google/genai";
-import { blobToBase64 } from '../utils/photoutils';
+import { blobToBase64 } from './utils/photoutils';
 
 interface ARScannerProps {
   onComplete: () => void;
